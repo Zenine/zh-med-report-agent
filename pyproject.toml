@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "medagent-reliability"
+version = "0.1.0-dev"
+description = "High-reliability medical Agent architecture lab for Chinese clinical scenarios"
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph>=0.4",
+    "langchain-core>=0.3",
+    "langchain-openai>=0.3",
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.8",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
