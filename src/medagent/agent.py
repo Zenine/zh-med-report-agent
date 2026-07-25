@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import json
+import os
 from typing import Any, TypedDict
 
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -21,8 +21,17 @@ class AgentState(TypedDict):
     needs_handoff: bool
 
 
-def build_llm(model: str = "gpt-4o-mini", temperature: float = 0.1) -> ChatOpenAI:
-    return ChatOpenAI(model=model, temperature=temperature)
+def build_llm(
+    model: str | None = None,
+    temperature: float = 0.1,
+    base_url: str | None = None,
+) -> ChatOpenAI:
+    model = model or os.environ.get("MEDAGENT_MODEL", "gpt-4o-mini")
+    base_url = base_url or os.environ.get("OPENAI_API_BASE")
+    kwargs: dict[str, Any] = {"model": model, "temperature": temperature}
+    if base_url:
+        kwargs["base_url"] = base_url
+    return ChatOpenAI(**kwargs)
 
 
 def parse_input(state: AgentState) -> AgentState:

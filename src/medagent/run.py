@@ -4,15 +4,31 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
 
+def _load_dotenv() -> None:
+    """Minimal .env loader — no extra dependency."""
+    env_path = Path(__file__).resolve().parents[2] / ".env"
+    if not env_path.exists():
+        return
+    for line in env_path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        os.environ.setdefault(key.strip(), value.strip())
+
+
 def main() -> None:
+    _load_dotenv()
+
     parser = argparse.ArgumentParser(description="运行医疗 Agent 单例分析")
     parser.add_argument("--task", required=True, help="任务文件路径 (JSONL)")
     parser.add_argument("--case", type=int, default=0, help="任务编号 (0-indexed)")
-    parser.add_argument("--model", default="gpt-4o-mini", help="LLM 模型名称")
+    parser.add_argument("--model", default=None, help="LLM 模型名称（默认读 MEDAGENT_MODEL 环境变量）")
     parser.add_argument("--dry-run", action="store_true", help="只打印任务内容，不调用 LLM")
     args = parser.parse_args()
 
@@ -41,6 +57,9 @@ def main() -> None:
         return
 
     from medagent.agent import run_case
+
+    if args.model:
+        os.environ["MEDAGENT_MODEL"] = args.model
 
     result = run_case(task["input"])
     print("---Agent 输出---")
